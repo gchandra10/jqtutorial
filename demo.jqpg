@@ -1,0 +1,116 @@
+#https://marketplace.visualstudio.com/items?itemName=davidnussio.vscode-jq-playground
+
+## Just saying Hi
+jq .
+"Hello JSON Lovers"
+
+## Displaying contents of demo.json with pretty output
+jq -r .
+./demo.json
+
+## Get the count of Total Documents
+jq -r '.|length' 
+./demo.json
+
+## Get the number of elements in first document.
+jq -r '.[0]|length' 
+./demo.json
+
+## Displaying the First Document
+jq -r 'first(.[])' 
+./demo.json
+
+## Displaying the Last Document
+jq -r 'last(.[])' 
+./demo.json
+
+## Getting the Keys from Root
+jq -r '.|keys'
+./demo.json
+
+jq -r '.[0]|keys'
+./demo.json
+
+
+## Total elements in each document
+jq -r '.[]|length' 
+./demo.json
+
+## Get First and Last Name
+
+#Try 1 : Get the first and last names from all documents.
+jq -r '.[]|.name.first,.name.last' 
+./demo.json
+
+#Try 2 : Convert the multi line output to Array by adding []
+jq -r '.[]|[.name.first,.name.last]' 
+./demo.json 
+
+# Try 3: This is flattening the output to CSV format
+jq -r '.[]|[.name.first,.name.last] | @csv' 
+./demo.json
+
+## Adding few more items
+
+jq -r '.[]|[.name.first,.name.last,.email,.phone] | @csv' 
+./demo.json 
+
+## Alternate way to display using String Interpolation
+## Try 1 :
+jq -r '.[]|(.name.first),(.name.last),(.age),(.email),(.phone)' 
+./demo.json 
+
+## Try 2:
+jq -r '.[]|"\(.name.first),\(.name.last),\(.age),\(.email),\(.phone)"' 
+./demo.json
+
+
+## Now lets try to parse child array
+## Try 1
+jq -r '.[]|.friends[].name' 
+./demo.json
+
+## Try 2 :
+jq -r '.[]|[.friends[].name]' 
+./demo.json 
+
+## Try 3 : 
+jq -r '.[]|[.friends[].name] | @csv' 
+./demo.json 
+
+## Denormalizing Parent data with child data
+
+jq -r '.[]|"\(.name.first),\(.name.last),\(.age),\(.email),\(.phone),\(.friends[]|[.id,.name]|@csv)"' 
+./demo.json 
+
+## Denormaling it further by adding one more array Temperature
+
+jq -r '.[]|"\(.name.first),\(.name.last),\(.age),\(.email),\(.phone),\(.friends[]|[.id,.name]|@csv),\(.temperature[]|@csv)"' 
+./demo.json 
+
+##Adding custom variable
+
+jq -r --arg todayDate "2021-04-24"  '.[]|"\($todayDate),\(.name.first),\(.name.last),\(.age),\(.email),\(.phone),\(.friends[]|[.id,.name]|@csv),\(.temperature[]|@csv)"' 
+./demo.json 
+
+## using functions to convert to lower case in jq
+jq -r --arg todayDate "2021-04-24"  '.[]|"\($todayDate),\(.name.first|ascii_downcase),\(.name.last|ascii_downcase),\(.age),\(.email),\(.phone),\(.friends[]|[.id,(.name|ascii_downcase)]|@csv),\(.temperature[]|@csv)"' 
+./demo.json
+
+## Get eye colors
+jq '.[]| [.eyeColor] ' 
+./demo.json 
+
+## Filter by eyeColor blue
+jq '.[]|select(.eyeColor=="blue")| [.eyeColor,.name.first]' 
+./demo.json 
+
+## Applying the same logic on to previous denormalized output.
+jq -r --arg todayDate "2021-04-24"  '.[]| select(.eyeColor=="blue")| "\($todayDate),\(.name.first|ascii_downcase),\(.name.last|ascii_downcase),\(.eyeColor),\(.age),\(.email),\(.phone),\(.friends[]|[.id,(.name|ascii_downcase)]|@csv),\(.temperature[]|@csv)"' 
+./demo.json
+
+## Separating Data from Filter
+## This is a CLI functionality wont work on VSCode Notebook.
+jq -r --arg todayDate "2021-04-24" --from-file ./demoparser.jq 
+./demo.json
+
